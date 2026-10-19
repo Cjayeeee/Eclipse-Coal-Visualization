@@ -28,6 +28,9 @@ export default function Preloader({ onDone }) {
   useEffect(() => {
     const reduce = prefersReducedMotion();
     const shown = { p: 0 };
+    const started = performance.now();
+    // Long enough to read the wordmark and watch the moon cross, even on a fast connection.
+    const MIN_SHOW = 1800;
     let loaded = 0;
     const tasks = [...FONTS.map((f) => document.fonts.load(f).catch(() => {})), ...IMAGES.map(loadImage)];
     const total = tasks.length;
@@ -39,8 +42,8 @@ export default function Preloader({ onDone }) {
 
     const ctx = gsap.context(() => {
       if (!reduce) {
-        gsap.from('.preloader__word span', { yPercent: 120, stagger: 0.05, duration: 0.8, ease: 'expo.out' });
-        gsap.from('.preloader .eclipse', { scale: 0.7, autoAlpha: 0, duration: 0.9, ease: 'expo.out' });
+        gsap.from('.preloader__word span', { yPercent: 120, stagger: 0.09, duration: 1.1, ease: 'expo.out', delay: 0.15 });
+        gsap.from('.preloader .eclipse', { scale: 0.7, autoAlpha: 0, duration: 1.2, ease: 'expo.out' });
         gsap.to('.preloader .eclipse__rays', { rotate: 360, duration: 40, repeat: -1, ease: 'none', svgOrigin: '0 0' });
       }
     }, root);
@@ -49,12 +52,13 @@ export default function Preloader({ onDone }) {
     const bump = () => {
       loaded += 1;
       progressTween?.kill();
-      progressTween = gsap.to(shown, { p: loaded / total, duration: reduce ? 0 : 0.5, ease: 'power2.out', onUpdate: render });
+      progressTween = gsap.to(shown, { p: (loaded / total) * 0.9, duration: reduce ? 0 : 1.4, ease: 'power2.out', onUpdate: render });
     };
     tasks.forEach((t) => t.then(bump));
 
     Promise.all(tasks).then(async () => {
       await document.fonts.ready;
+      if (!reduce) await new Promise((r) => setTimeout(r, Math.max(0, MIN_SHOW - (performance.now() - started))));
       ctx.add(() => {
         const svg = root.current.querySelector('.eclipse');
         const box = svg.getBoundingClientRect();
@@ -70,10 +74,11 @@ export default function Preloader({ onDone }) {
           return;
         }
         const tl = gsap.timeline({ onComplete: finish });
-        tl.to(shown, { p: 1, duration: 0.35, onUpdate: render })
-          .to('.preloader__meta, .preloader__word', { autoAlpha: 0, y: -12, duration: 0.4, ease: 'power2.in' }, '<')
-          .to('.preloader .eclipse__rays', { autoAlpha: 0, scale: 1.4, svgOrigin: '0 0', duration: 0.5 }, '<')
-          .to(svg, { scale: cover, duration: 1.05, ease: 'expo.in' }, '-=0.1')
+        tl.to(shown, { p: 1, duration: 0.7, ease: 'power2.inOut', onUpdate: render })
+          .to({}, { duration: 0.5 }) // hold on totality with the wordmark still readable
+          .to('.preloader__meta, .preloader__word', { autoAlpha: 0, y: -12, duration: 0.5, ease: 'power2.in' })
+          .to('.preloader .eclipse__rays', { autoAlpha: 0, scale: 1.4, svgOrigin: '0 0', duration: 0.6 }, '<')
+          .to(svg, { scale: cover, duration: 1.2, ease: 'expo.in' }, '-=0.15')
           // Hand over to the hero: let the page underneath begin its entrance as we cut.
           .add(() => onDone?.('reveal'), '-=0.25')
           .to(root.current, { autoAlpha: 0, duration: 0.35, ease: 'none' });
