@@ -1,0 +1,122 @@
+/* ==========================================================================
+   ECLIPSE: design tokens & base
+   A risograph-zine take on a data story: soot night → paper → sunlight.
+   ========================================================================== */
+:root {
+  --soot: #15120e;
+  --coal: #211b15;
+  --ink: #1d1915;
+  --ink-2: #5d5447;
+  --paper: #f2ead9;
+  --paper-2: #e7d9ba;
+  --cream: #f2ead9;
+  --sun: #ffc21f;
+  --sun-deep: #f5a800;
+  --ember: #ff5a1f;
+  --ember-ink: #c93b0a;
+
+  --f-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
+  --f-body: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --f-hand: 'Caveat', 'Comic Sans MS', cursive;
+  --f-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --gutter: clamp(16px, 4vw, 64px);
+  --maxw: 1320px;
+  --radius: 6px;
+  --shadow-clip: 0 1px 0 rgba(29, 25, 21, 0.08), 0 18px 40px -22px rgba(29, 25, 21, 0.45);
+
+  --step--1: clamp(0.82rem, 0.78rem + 0.15vw, 0.9rem);
+  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+  --step-1: clamp(1.2rem, 1.05rem + 0.6vw, 1.55rem);
+  --step-2: clamp(1.6rem, 1.2rem + 1.6vw, 2.6rem);
+  --step-3: clamp(2.4rem, 1.4rem + 4vw, 5.2rem);
+  --step-4: clamp(3.4rem, 1.6rem + 8vw, 9.5rem);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; overflow-anchor: none; }
+body { overflow-anchor: none; }
+body {
+  margin: 0;
+  background: var(--soot);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  font-variation-settings: 'wdth' 100;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+html.is-loading body { background: var(--paper); }
+
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+p { margin: 0 0 1em; }
+h1, h2, h3 { margin: 0; font-weight: 400; }
+strong { font-weight: 700; }
+small { font-size: 0.62em; letter-spacing: 0.02em; }
+code { font-family: var(--f-mono); font-size: 0.9em; }
+
+:focus-visible { outline: 3px solid var(--ember); outline-offset: 3px; border-radius: 2px; }
+
+.mono {
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  margin: 0;
+}
+.muted { opacity: 0.66; }
+.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); position: relative; }
+
+.h2 { font-family: var(--f-display); font-size: var(--step-3); line-height: 0.92; text-transform: uppercase; }
+.h3 { font-family: var(--f-display); font-size: var(--step-2); line-height: 0.98; text-transform: uppercase; margin-bottom: 0.5em; }
+
+.hl-sun { color: var(--sun); }
+
+.skip {
+  position: fixed; left: 12px; top: -60px; z-index: 200;
+  background: var(--sun); color: var(--ink); padding: 10px 14px; font-weight: 700; border-radius: 4px;
+}
+.skip:focus { top: 12px; }
+
+/* Masked split-text lines (GSAP SplitText "mask") */
+.split-line { padding-bottom: 0.06em; margin-bottom: -0.06em; }
+
+/* Paper textures. Crinkle on light sheets (multiply), soft on dark ones. */
+[data-theme] { position: relative; isolation: isolate; }
+[data-theme]::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url('/tex/crinkle.jpg') center / cover;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: -1;
+}
+[data-theme='dark']::before { mix-blend-mode: screen; opacity: 0.05; filter: invert(1); }
+
+.grain {
+  position: fixed; inset: -50%;
+  background: url('/tex/grain.png');
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 90;
+  will-change: transform;
+}
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
